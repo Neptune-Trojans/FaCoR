@@ -1,13 +1,12 @@
-import gc, pdb
-from random import shuffle
 from sklearn.metrics import roc_curve,auc
+from torch.utils.data import DataLoader
+
 from dataset_p import *
 from dataset import *
 from models import *
 from torch.optim import SGD
 from losses import *
 import argparse
-import torch.optim.lr_scheduler as lr_scheduler
 
 
 def l2_norm(input,dim=1):
