@@ -89,7 +89,8 @@ class FIW2(Dataset):
         return sample_list
 
     def __len__(self):
-        return len(self.sample_list)
+        # return len(self.sample_list)
+        return 100
 
     def read_image(self, path):
         img = Image.open(path)
