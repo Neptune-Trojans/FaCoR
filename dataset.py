@@ -2,14 +2,9 @@ import os
 
 from torch.utils.data import Dataset
 from PIL import Image
-#from tensorflow import image
+
 import numpy as np
 from utils import np2tensor
-import random
-from torchvision import transforms
-from torch.utils.data import DataLoader
-import torch, pdb
-import tensorflow as tf
 
 
 class FIW(Dataset):
