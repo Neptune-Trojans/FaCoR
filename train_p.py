@@ -1,5 +1,6 @@
 from sklearn.metrics import roc_curve,auc
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from dataset_p import *
 from dataset import *
@@ -64,7 +65,7 @@ def training(args):
         contrastive_loss_epoch = 0
         model.train()
 
-        for index_i, data in enumerate(train_loader):
+        for index_i, data in tqdm(enumerate(train_loader), total=len(train_loader)):
             image1, image2,  labels, kin_label = data
 
             if method=='cont':
