@@ -19,31 +19,30 @@ def l2_norm(input,dim=1):
 
 def training(args):
 
-
-    batch_size=args.batch_size
-    val_batch_size=args.batch_size
-    epochs=args.epochs
-    steps_per_epoch=50
-    save_path=args.save_path
-    beta=args.beta
-    log_path=args.log_path
+    batch_size = args.batch_size
+    val_batch_size = args.batch_size
+    epochs = args.epochs
+    steps_per_epoch = 5
+    save_path = args.save_path
+    beta = args.beta
+    log_path = args.log_path
     method = args.method
     arch = args.arch
-    aug=args.aug
+    aug = args.aug
     txt = args.txt
 
-    train_dataset=FIW2(os.path.join(args.sample,args.txt))
-    val_dataset=FIW2(os.path.join(args.sample,"val_choose_A_m.txt"))
-    train_loader=DataLoader(train_dataset,batch_size=batch_size,num_workers=0,pin_memory=False, shuffle=True)
+    train_dataset = FIW2(os.path.join(args.sample, args.txt))
+    val_dataset = FIW2(os.path.join(args.sample, 'val_choose_A.txt'))
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=0, pin_memory=False, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=val_batch_size, num_workers=0, pin_memory=False)
     
-    if arch=='ada3':
-        model=Net_ada3().cuda()
+    if arch =='ada3':
+        model = Net_ada3()
 
-    model = torch.nn.DataParallel(model).cuda()
+    model = torch.nn.DataParallel(model)
     optimizer_model = SGD(model.parameters(), lr=args.lr, momentum=0.9)
 
-    max_auc=0.0
+    max_auc = 0.0
 
 
     for epoch_i in range(epochs):
@@ -53,7 +52,7 @@ def training(args):
         model.train()
 
         for index_i, data in enumerate(train_loader):
-            image1, image2,  labels, kin_label,_ = data
+            image1, image2,  labels, kin_label = data
 
             if method=='cont':
                 e1,e2,x1,x2,att= model([image1,image2], aug=False)
@@ -63,18 +62,18 @@ def training(args):
 
             optimizer_model.zero_grad()
             loss.backward()
-            optimizer_model.step()      
+            optimizer_model.step()
 
             contrastive_loss_epoch += loss.item()
-            
+
             if (index_i+1)==steps_per_epoch and args.all:
                 break
 
         use_sample=(epoch_i+1)*batch_size*steps_per_epoch
-        # train_dataset.set_bias(use_sample)
 
 
-        mylog("contrastive_loss:" + "%.6f" % (contrastive_loss_epoch / steps_per_epoch),path=log_path)
+
+        # mylog("contrastive_loss:" + "%.6f" % (contrastive_loss_epoch / steps_per_epoch),path=log_path)
         model.eval()
         with torch.no_grad():
             auc = val_model(model, val_loader, aug)
@@ -96,8 +95,8 @@ def val_model(model, val_loader, aug):
     y_true = []
     y_pred = []
     # for img1, img2, labels, _ in val_loader:
-    for img1, img2, labels, _, _ in val_loader:
-        e1,e2,x1,x2,_=model([img1.cuda(),img2.cuda()])
+    for img1, img2, labels, _ in val_loader:
+        e1,e2,x1,x2,_ = model([img1, img2])
 
         if args.method=='sig':
             y_pred.extend(x1.cpu().detach().numpy().tolist())
@@ -106,7 +105,7 @@ def val_model(model, val_loader, aug):
 
         y_true.extend(labels.cpu().detach().numpy().tolist())
     fpr, tpr, _ = roc_curve(y_true, y_pred)
-    return auc(fpr,tpr)
+    return auc(fpr, tpr)
 
 
 if __name__=="__main__":

@@ -3,7 +3,7 @@ import os
 import random
 import numpy as np
 
-def np2tensor(arrays,device='gpu'):
+def np2tensor(arrays,device='cpu'):
     tensor=torch.from_numpy(arrays).type(torch.float)
     return tensor.cuda() if device=='gpu' else tensor
 
@@ -18,7 +18,7 @@ def mylog(*t,path = 'log.txt'):
     f.close()
 
 def set_seed(seed):
-    torch.set_default_tensor_type(torch.cuda.FloatTensor)
+    # torch.set_default_tensor_type(torch.cuda.FloatTensor)
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

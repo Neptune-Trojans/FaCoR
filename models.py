@@ -1,5 +1,8 @@
 import torch, pdb
+from torch import nn
+
 from inference import load_pretrained_model, to_input
+from torch_resnet101 import KitModel
 
 
 # from FAC.kernelconv2d import KernelConv2D
@@ -14,7 +17,7 @@ def l2_norm(input,axis=1):
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.encoder=KitModel("./kit_resnet101.pkl")
+        self.encoder = KitModel("./kit_resnet101.pkl")
 
         self.projection=nn.Sequential(
             torch.nn.Linear(512, 256),
@@ -50,7 +53,7 @@ class Net(torch.nn.Module):
 class Net_ada3(torch.nn.Module):
     def __init__(self):
         super(Net_ada3, self).__init__()
-        # self.encoder=KitModel("./kit_resnet101.pkl")
+        # https://github.com/mk-minchul/AdaFace?tab=readme-ov-file
         self.Ada_model = load_pretrained_model('ir_101')
         #'''
         self.projection=nn.Sequential(

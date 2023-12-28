@@ -1,6 +1,8 @@
+import os
+
 from torch.utils.data import Dataset
 from tensorflow.keras.preprocessing import image
-#from tensorflow import image 
+#from tensorflow import image
 import numpy as np
 from utils import np2tensor
 import random
@@ -70,10 +72,10 @@ class FIW2(Dataset):
                  sample_path,
                  transform=None):
 
-        self.sample_path=sample_path
-        self.transform=transform
-        self.sample_list=self.load_sample()
-        self.bias=0
+        self.sample_path = sample_path
+        self.transform = transform
+        self.sample_list = self.load_sample()
+        self.bias = 0
 
     def load_sample(self):
         sample_list= []
@@ -85,7 +87,7 @@ class FIW2(Dataset):
             else:
                 # pdb.set_trace()
                 tmp = line.split(' ')
-                sample_list.append([tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5]])
+                sample_list.append([tmp[0], tmp[1], tmp[2], tmp[3], tmp[4]])
         f.close()
         return sample_list
 
@@ -105,9 +107,11 @@ class FIW2(Dataset):
 
     def __getitem__(self, item):
         sample = self.sample_list[item+self.bias]
-        img1,img2=self.read_image(sample[1]),self.read_image(sample[2])        
+        sample_1 = os.path.join('input_data', sample[1])
+        sample_2 = os.path.join('input_data', sample[2])
+        img1, img2 = self.read_image(sample_1), self.read_image(sample_2)
         if self.transform is not None:
-            img1,img2 = self.transform(img1),self.transform(img2)
+            img1, img2 = self.transform(img1), self.transform(img2)
         img1, img2 = np2tensor(self.preprocess(np.array(img1, dtype=float))), \
                      np2tensor(self.preprocess(np.array(img2, dtype=float)))
 
@@ -116,8 +120,8 @@ class FIW2(Dataset):
         # pdb.set_trace()
         # kin_label = np2tensor(np.array(sample[3], dtype=float))
         kin_label = sample[3]
-        quality = np2tensor(np.array(sample[5], dtype=float))
-        return img1, img2, label, kin_label, quality
+        # quality = np2tensor(np.array(sample[5], dtype=float))
+        return img1, img2, label, kin_label
 
 
 class FIW_R(Dataset):

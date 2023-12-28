@@ -5,16 +5,16 @@ import numpy as np
 
 
 adaface_models = {
-    'ir_50':"pretrained/adaface_ir50_ms1mv2.ckpt",
-    'ir_101':"adaface_ir101_webface12m.ckpt",#"adaface_ir101_webface12m.ckpt",adaface_ir101_ms1mv3
-    'ir_101_2':"adaface_ir101_webface12m.ckpt",#"adaface_ir101_webface12m.ckpt",adaface_ir101_ms1mv3
+    'ir_50': "pretrained/adaface_ir50_ms1mv2.ckpt",
+    'ir_101': "input_data/adaface_ir101_webface12m.ckpt",#"adaface_ir101_webface12m.ckpt",adaface_ir101_ms1mv3
+    'ir_101_2': "input_data/adaface_ir101_webface12m.ckpt",#"adaface_ir101_webface12m.ckpt",adaface_ir101_ms1mv3
 }
 
 def load_pretrained_model(architecture='ir_101'):
     # load model and pretrained statedict
     assert architecture in adaface_models.keys()
     model = net.build_model(architecture)
-    statedict = torch.load(adaface_models[architecture])['state_dict']
+    statedict = torch.load(adaface_models[architecture], map_location=torch.device('cpu'))['state_dict']
     model_statedict = {key[6:]:val for key, val in statedict.items() if key.startswith('model.')}
     model.load_state_dict(model_statedict)
     model.eval()

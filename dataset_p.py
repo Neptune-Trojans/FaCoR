@@ -54,7 +54,7 @@ class FIW2(Dataset):
         sample = self.sample_list[item+self.bias]
         img1,img2=self.read_image(sample[0]),self.read_image(sample[1])
         if self.transform is not None:
-            img1,img2 = self.transform(img1),self.transform(img2)
+            img1, img2 = self.transform(img1),self.transform(img2)
         img1, img2 = np2tensor(self.preprocess(np.array(img1, dtype=float))), \
                      np2tensor(self.preprocess(np.array(img2, dtype=float)))
         label = np2tensor(np.array(sample[2], dtype=float))
