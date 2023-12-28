@@ -1,8 +1,7 @@
 from torch.utils.data import Dataset
-from tensorflow.keras.preprocessing import image
-#from tensorflow import image 
 import numpy as np
 from utils import np2tensor
+from PIL import Image
 import random
 from torchvision import transforms
 from torch.utils.data import DataLoader
@@ -39,8 +38,8 @@ class FIW2(Dataset):
         return len(self.sample_list)
 
     def read_image(self, path):
-        img = image.load_img(path, target_size=(112, 112))
-        #img = tf.image.resize(path, [112, 112])
+        img = Image.open(path)
+        img = img.resize((112, 112))
         return img
 
     def set_bias(self,bias):
