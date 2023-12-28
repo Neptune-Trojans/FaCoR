@@ -65,12 +65,14 @@ class FIW(Dataset):
 class FIW2(Dataset):
     def __init__(self,
                  sample_path,
+                 device,
                  transform=None):
 
         self.sample_path = sample_path
         self.transform = transform
         self.sample_list = self.load_sample()
         self.bias = 0
+        self._device = device
 
     def load_sample(self):
         sample_list= []
@@ -109,11 +111,11 @@ class FIW2(Dataset):
         img1, img2 = self.read_image(sample_1), self.read_image(sample_2)
         if self.transform is not None:
             img1, img2 = self.transform(img1), self.transform(img2)
-        img1, img2 = np2tensor(self.preprocess(np.array(img1, dtype=float))), \
-                     np2tensor(self.preprocess(np.array(img2, dtype=float)))
+        img1, img2 = np2tensor(self.preprocess(np.array(img1, dtype=float)), device=self._device), \
+                     np2tensor(self.preprocess(np.array(img2, dtype=float)), device=self._device)
 
         # pdb.set_trace()
-        label = np2tensor(np.array(sample[4], dtype=float))
+        label = np2tensor(np.array(sample[4], dtype=float), device=self._device)
         # pdb.set_trace()
         # kin_label = np2tensor(np.array(sample[3], dtype=float))
         kin_label = sample[3]

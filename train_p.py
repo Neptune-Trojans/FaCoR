@@ -9,6 +9,14 @@ from losses import *
 import argparse
 
 
+def get_device():
+    if torch.backends.mps.is_built():
+        device = torch.device('mps')
+    else:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    return device
+
+
 def l2_norm(input,dim=1):
     # pdb.set_trace()
     norm = torch.norm(input,2,dim,True)
@@ -30,13 +38,18 @@ def training(args):
     aug = args.aug
     txt = args.txt
 
-    train_dataset = FIW2(os.path.join(args.sample, args.txt))
-    val_dataset = FIW2(os.path.join(args.sample, 'val_choose_A.txt'))
+    device = get_device()
+
+    train_dataset = FIW2(os.path.join(args.sample, args.txt), device)
+    val_dataset = FIW2(os.path.join(args.sample, 'val_choose_A.txt'), device)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=0, pin_memory=False, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=val_batch_size, num_workers=0, pin_memory=False)
+
+
     
     if arch =='ada3':
         model = Net_ada3()
+        model = model.to(device=device)
 
     model = torch.nn.DataParallel(model)
     optimizer_model = SGD(model.parameters(), lr=args.lr, momentum=0.9)

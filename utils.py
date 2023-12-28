@@ -3,9 +3,11 @@ import os
 import random
 import numpy as np
 
-def np2tensor(arrays,device='cpu'):
-    tensor=torch.from_numpy(arrays).type(torch.float)
-    return tensor.cuda() if device=='gpu' else tensor
+
+def np2tensor(arrays, device='cpu'):
+    tensor = torch.from_numpy(arrays).type(torch.float)
+    tensor = tensor.to(device)
+    return tensor
 
 def mylog(*t,path = 'log.txt'):
     t=" ".join([str(now) for now in t])

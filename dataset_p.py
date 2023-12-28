@@ -8,12 +8,14 @@ from PIL import Image
 class FIW2(Dataset):
     def __init__(self,
                  sample_path,
+                 device,
                  transform=None):
 
         self.sample_path=sample_path
         self.transform=transform
         self.sample_list=self.load_sample()
         self.bias=0
+        self._device=device
 
     def load_sample(self):
         sample_list= []
@@ -50,10 +52,10 @@ class FIW2(Dataset):
         img1,img2=self.read_image(sample[0]),self.read_image(sample[1])
         if self.transform is not None:
             img1, img2 = self.transform(img1),self.transform(img2)
-        img1, img2 = np2tensor(self.preprocess(np.array(img1, dtype=float))), \
-                     np2tensor(self.preprocess(np.array(img2, dtype=float)))
-        label = np2tensor(np.array(sample[2], dtype=float))
-        kin_label = np2tensor(np.array(sample[4], dtype=float))
-        id1 = np2tensor(np.array(sample[5], dtype=float))
-        id2 = np2tensor(np.array(sample[6], dtype=float))
+        img1, img2 = np2tensor(self.preprocess(np.array(img1, dtype=float)), device=self._device), \
+                     np2tensor(self.preprocess(np.array(img2, dtype=float)), device=self._device)
+        label = np2tensor(np.array(sample[2], dtype=float), device=self._device)
+        kin_label = np2tensor(np.array(sample[4], dtype=float), device=self._device)
+        id1 = np2tensor(np.array(sample[5], dtype=float), device=self._device)
+        id2 = np2tensor(np.array(sample[6], dtype=float), device=self._device)
         return img1, img2, label, kin_label, id1, id2
