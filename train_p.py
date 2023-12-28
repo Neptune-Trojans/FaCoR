@@ -39,6 +39,7 @@ def training(args):
     txt = args.txt
 
     device = get_device()
+    print(f'working on device {device}')
 
     train_dataset = FIW2(os.path.join(args.sample, args.txt), device)
     val_dataset = FIW2(os.path.join(args.sample, 'val_choose_A.txt'), device)
