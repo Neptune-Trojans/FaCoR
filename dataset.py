@@ -1,4 +1,5 @@
 import os
+import random
 
 from torch.utils.data import Dataset
 from PIL import Image
@@ -89,8 +90,8 @@ class FIW2(Dataset):
         return sample_list
 
     def __len__(self):
-        # return len(self.sample_list)
-        return 100
+        return len(self.sample_list)
+        #return 2000
 
     def read_image(self, path):
         img = Image.open(path)
