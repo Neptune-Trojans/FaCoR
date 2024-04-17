@@ -1,7 +1,10 @@
-import gc, pdb
 from sklearn.metrics import roc_curve,auc
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
 from dataset import *
 from models import *
+
 from utils import *
 import torch_resnet101
 import torch
@@ -12,37 +15,41 @@ import argparse
 import scipy.io as sio 
 
 
+def l2_norm(input, dim=1):
 
-def l2_norm(input,dim=1):
-    # pdb.set_trace()
-    norm = torch.norm(input,2,dim,True)
+    norm = torch.norm(input, 2, dim, True)
     output = torch.div(input, norm)
     return output
 
 
 def find(args):
-    path=args.save_path
-    batch_size=args.batch_size
-    log_path=args.log_path
-    arch=args.arch
+    path = args.save_path
+    batch_size = args.batch_size
+    log_path = args.log_path
+    arch = args.arch
     aug = args.aug
+
     txt = args.txt
-    # pdb.set_trace()
-    method=args.method
+    method = args.method
 
-    val_dataset = FIW(os.path.join(args.sample,"val_A.txt"))
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, num_workers=0, pin_memory=False)
+    device = get_device()
+    print(f'working on device {device}')
 
-    if arch=='ada3':
-        model=Net_ada3().cuda()
-   
-    model = torch.nn.DataParallel(model).cuda()
-    model.load_state_dict(torch.load(path))
+    val_dataset = FIW2(os.path.join(args.sample, "val_A.txt"), device)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, num_workers=0, pin_memory=False, shuffle=True)
+
+    if arch == 'ada3':
+        model = Net_ada3()
+        model = model.to(device=device)
+
+    checkpoint = torch.load(path, map_location=torch.device(device))
+    model = torch.nn.DataParallel(model)
+    model.load_state_dict(checkpoint)
     model.eval()
     with torch.no_grad():
-        auc ,threshold = val_model(model, val_loader, aug)
-    mylog("auc : ",auc,path=log_path)
-    mylog("threshold :" ,threshold,path=log_path)
+        auc, threshold = val_model(model, val_loader, aug)
+    mylog("auc : ", auc, path=log_path)
+    mylog("threshold :", threshold, path=log_path)
 
 
 def val_model(model, val_loader, aug):
@@ -50,10 +57,10 @@ def val_model(model, val_loader, aug):
     y_pred = []
     # for img1, img2, img1_1, img2_1, _ in val_loader:
     method=args.method
-    for data in enumerate(val_loader):
+    for data in tqdm(enumerate(val_loader)):
         img1, img2, labels, _ = data[1]
         # img1, img2, labels, _, _ = data[1]   
-        e1,e2,x1,x2,_=model([img1.cuda(),img2.cuda()])  
+        e1, e2, x1, x2, _ = model([img1, img2])
         aug=False
         if aug and args.method=='mixco':
             # e1,e2,x1,x2,att= model([img1.cuda(),img2.cuda()], aug=False)
@@ -113,12 +120,12 @@ if __name__=="__main__":
     parser.add_argument("--batch_size", type=int, default=40, help="batch size default 40")
     parser.add_argument("--log_path", type=str, default="./log.txt",help="log path default log.txt ")
     parser.add_argument("--gpu", default="1", type=str, help="gpu id you use")
-    parser.add_argument( "--training_method", default="sig", type=str, help="gpu id you use")
-    parser.add_argument( "--arch", default="org", type=str, help="gpu id you use")
-    parser.add_argument( "--method", default="cont", type=str, help="gpu id you use")
-    parser.add_argument( "--aug", default="False", type=str, help="gpu id you use")
-    parser.add_argument( "--lam2", default=0.8, type=float, help="beta default 0.08")
-    parser.add_argument( "--txt",  type=str, help="model save path")
+    parser.add_argument("--training_method", default="sig", type=str, help="gpu id you use")
+    parser.add_argument("--arch", default="org", type=str, help="gpu id you use")
+    parser.add_argument("--method", default="cont", type=str, help="gpu id you use")
+    parser.add_argument("--aug", default="False", type=str, help="gpu id you use")
+    parser.add_argument("--lam2", default=0.8, type=float, help="beta default 0.08")
+    parser.add_argument("--txt",  type=str, help="model save path")
     args = parser.parse_args()
     # os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     torch.multiprocessing.set_start_method("spawn")
