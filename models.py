@@ -1,11 +1,8 @@
-import torch, pdb
+import torch
 from torch import nn
 
-from inference import load_pretrained_model, to_input
+from inference import load_pretrained_model
 from torch_resnet101 import KitModel
-
-
-# from FAC.kernelconv2d import KernelConv2D
 
 
 def l2_norm(input,axis=1):
@@ -13,6 +10,7 @@ def l2_norm(input,axis=1):
     norm = torch.norm(input,2,axis,True)
     output = torch.div(input, norm)
     return output
+
 
 class Net(torch.nn.Module):
     def __init__(self):
@@ -150,8 +148,7 @@ class Net_ada3(torch.nn.Module):
         f1s = torch.flatten(f1s,1)
         f2s = torch.flatten(f2s,1)
 
-
-        return f1s,f2s,f1s,f2s, att_map0
+        return f1s, f2s, f1s, f2s, att_map0
 
 
 class FSFNet2(nn.Module):
