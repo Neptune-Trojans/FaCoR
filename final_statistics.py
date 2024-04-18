@@ -122,7 +122,8 @@ def read_image(path):
     # img = image.load_img(path, target_size=(112, 112))
     img = Image.open(path)
     img = img.resize((112, 112))
-    img = np.array(img).astype(np.float)
+    img = np.array(img, dtype=float)
+    # img = np.array(img).astype(np.float)
     return np.transpose(img, (2, 0, 1))
 
 def read_image_align(path):
