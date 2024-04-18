@@ -46,9 +46,9 @@ def baseline_model2(model_path, device):
     return model
 
 
-def get_test(sample_path, res, args):
+def get_test(res, args):
     txt = args.txt
-    test_file_path = os.path.join(sample_path, "test_A.txt")
+    test_file_path = args.test_pairs
 
 
     test=[]
@@ -83,8 +83,8 @@ def gen(list_tuples, batch_size):
             datas.append([now[1],now[2]])
             labels.append(int(now[4]))
             classes.append(now[3])
-        X1 = np.array([read_image(os.path.join(args.sample, x[0])) for x in datas])
-        X2 = np.array([read_image(os.path.join(args.sample, x[1])) for x in datas])
+        X1 = np.array([read_image(os.path.join(args.images_root, x[0])) for x in datas])
+        X2 = np.array([read_image(os.path.join(args.images_root, x[1])) for x in datas])
         yield X1, X2, labels,classes,batch_list
         start=end
         if start == total:
@@ -138,7 +138,7 @@ def read_image_align(path):
 
 def final_statistics(args):
     model_path = args.save_path
-    sample_path = args.sample
+
     batch_size = args.batch_size
     log_path = args.log_path
     threshold = args.threshold
@@ -154,7 +154,7 @@ def final_statistics(args):
     res={}
     for n in classes:
         res[n]=[0,0]
-    test_samples = get_test(sample_path, res, args)
+    test_samples = get_test(res, args)
     with torch.no_grad():
         aug=False
         # for img1, img2, img1_1, img2_1, labels, classes, batch_list in gen(test_samples, batch_size):
@@ -234,7 +234,9 @@ def final_statistics(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="test  accuracy")
-    parser.add_argument("--sample", type=str, help="sample root")
+    parser.add_argument("--images_root", type=str, help="sample root")
+    parser.add_argument("--test_pairs", type=str, help="sample root")
+
     parser.add_argument("--save_path", type=str, help="model save path")
     parser.add_argument("--threshold", type=float, default=0.01, help=" threshold ")
     parser.add_argument("--batch_size", type=int, default=40, help="batch size default 40")
@@ -246,9 +248,8 @@ if __name__ == "__main__":
     parser.add_argument( "--lam2", default=0.8, type=float, help="beta default 0.08")
     parser.add_argument( "--txt",  type=str, help="model save path")
     args = parser.parse_args()
-    # os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+
     set_seed(100)
 
-    # threshold = scipy.io.loadmat(args.log_path[:-4]+'.mat')['threshold'][0, 0]
-    args.threshold = 0.1180783063173294
+    args.threshold = 0.15235882997512817
     final_statistics(args)
