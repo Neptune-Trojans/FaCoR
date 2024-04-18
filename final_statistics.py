@@ -231,7 +231,7 @@ def final_statistics(args):
     sio.savemat(args.log_path[:-4]+'_auc_'+'.mat', {'pred': y_pred2, 'true':y_true, 'AUC':auc(fpr,tpr)})
 
     for key in res:
-        mylog(key, ':', res[key][1] / res[key][0], path=log_path)
+        mylog(key, ':', res[key][1], res[key][0], path=log_path)
     print('AUC='+str(auc(fpr,tpr)))
 
 
