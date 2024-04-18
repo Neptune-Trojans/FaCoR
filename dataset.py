@@ -91,8 +91,8 @@ class FIW2(Dataset):
         return sample_list
 
     def __len__(self):
-        # return len(self.sample_list)
-        return 2000
+        return len(self.sample_list)
+        # return 2000
 
     def read_image(self, path):
         img = Image.open(path)
@@ -101,8 +101,8 @@ class FIW2(Dataset):
         #img = tf.image.resize(path, [112, 112])
         return img
 
-    def set_bias(self,bias):
-        self.bias=bias
+    def set_bias(self, bias):
+        self.bias = bias
 
     def preprocess(self, img):
         return np.transpose(img, (2, 0, 1))
