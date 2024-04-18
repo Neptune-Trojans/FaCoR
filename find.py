@@ -35,7 +35,7 @@ def find(args):
     device = get_device()
     print(f'working on device {device}')
 
-    val_dataset = FIW2(os.path.join(args.sample, "val_A.txt"), device)
+    val_dataset = FIW2(args.images_root, args.validation_pairs, device)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, num_workers=0, pin_memory=False, shuffle=True)
 
     if arch == 'ada3':
@@ -110,12 +110,14 @@ def val_model(model, val_loader, aug):
     maxindex = (tpr - fpr).tolist().index(max(tpr - fpr))
     threshold = thresholds_keras[maxindex]
     sio.savemat(args.log_path[:-4]+'.mat', {'threshold': threshold, 'fpr': fpr, 'tpr': tpr, 'thresholds_keras': thresholds_keras})
-    return auc(fpr,tpr),threshold
+    return auc(fpr, tpr), threshold
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="find threshold")
-    parser.add_argument("--sample", type=str, help="sample root")
+    parser.add_argument("--images_root", type=str, help="sample root")
+    parser.add_argument("--validation_pairs", type=str, help="sample root")
+
     parser.add_argument("--save_path", type=str, help="model save path")
     parser.add_argument("--batch_size", type=int, default=40, help="batch size default 40")
     parser.add_argument("--log_path", type=str, default="./log.txt",help="log path default log.txt ")
