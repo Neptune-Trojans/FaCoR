@@ -5,6 +5,11 @@ import gc, pdb
 from tqdm import tqdm
 
 from models import *
+# import sys
+# import torch
+# from tensorflow.keras.preprocessing import image
+# import os
+from PIL import Image
 from utils import *
 import scipy.io as sio
 from sklearn.metrics import roc_curve,auc
@@ -114,7 +119,9 @@ def gen2(list_tuples, batch_size):
 
 
 def read_image(path):
-    img = image.load_img(path, target_size=(112, 112))
+    # img = image.load_img(path, target_size=(112, 112))
+    img = Image.open(path)
+    img = img.resize((112, 112))
     img = np.array(img).astype(np.float)
     return np.transpose(img, (2, 0, 1))
 
