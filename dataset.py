@@ -91,8 +91,8 @@ class FIW2(Dataset):
         return sample_list
 
     def __len__(self):
-        return len(self.sample_list)
-        # return 2000
+        #return len(self.sample_list)
+        return 5000
 
     def read_image(self, path):
         img = Image.open(path)
@@ -108,7 +108,8 @@ class FIW2(Dataset):
         return np.transpose(img, (2, 0, 1))
 
     def __getitem__(self, item):
-        sample = self.sample_list[item+self.bias]
+        sample = random.sample(self.sample_list, 1)[0]
+
         sample_1 = os.path.join(self.images_root, sample[1])
         sample_2 = os.path.join(self.images_root, sample[2])
         img1, img2 = self.read_image(sample_1), self.read_image(sample_2)
