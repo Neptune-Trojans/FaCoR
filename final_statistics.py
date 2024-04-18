@@ -5,11 +5,6 @@ import gc, pdb
 from tqdm import tqdm
 
 from models import *
-import sys
-import torch
-from tensorflow.keras.preprocessing import image
-import os
-
 from utils import *
 import scipy.io as sio
 from sklearn.metrics import roc_curve,auc
