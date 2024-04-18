@@ -33,8 +33,8 @@ def training(args):
     device = get_device()
     print(f'working on device {device}')
 
-    train_dataset = FIW2(os.path.join(args.sample, args.txt), device)
-    val_dataset = FIW2(os.path.join(args.sample, 'val_choose_A.txt'), device)
+    train_dataset = FIW2(args.images_root, args.train_pairs, device)
+    val_dataset = FIW2(args.images_root, args.validation_pairs, device)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=0, pin_memory=False, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=val_batch_size, num_workers=0, pin_memory=False)
 
@@ -112,7 +112,10 @@ def val_model(model, val_loader, aug):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="train")
     parser.add_argument("--batch_size", type=int, default=25, help="batch size default 25")
-    parser.add_argument("--sample", type=str, help="sample root")
+    parser.add_argument("--images_root", type=str, help="sample root")
+    parser.add_argument("--train_pairs", type=str, help="sample root")
+    parser.add_argument("--validation_pairs", type=str, help="sample root")
+
     parser.add_argument("--save_path",  type=str, help="model save path")
     parser.add_argument("--epochs", type=int, default=40, help="epochs number default 80")
     parser.add_argument("--lr", type=float, default=1e-4, help="epochs number default 80")

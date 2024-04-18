@@ -65,10 +65,11 @@ class FIW(Dataset):
 
 class FIW2(Dataset):
     def __init__(self,
+                 images_root,
                  sample_path,
                  device,
                  transform=None):
-
+        self.images_root = images_root
         self.sample_path = sample_path
         self.transform = transform
         self.sample_list = self.load_sample()
@@ -108,8 +109,8 @@ class FIW2(Dataset):
 
     def __getitem__(self, item):
         sample = self.sample_list[item+self.bias]
-        sample_1 = os.path.join('input_data', sample[1])
-        sample_2 = os.path.join('input_data', sample[2])
+        sample_1 = os.path.join(self.images_root, sample[1])
+        sample_2 = os.path.join(self.images_root, sample[2])
         img1, img2 = self.read_image(sample_1), self.read_image(sample_2)
         if self.transform is not None:
             img1, img2 = self.transform(img1), self.transform(img2)
