@@ -51,7 +51,7 @@ def training(args):
 
     for epoch_i in range(epochs):
         mylog("\n*************", path=log_path)
-        log_str = f'epoch {epoch_i + 1} {scheduler.get_last_lr()[0]:.6f}'
+        log_str = f'epoch {epoch_i + 1} lr {scheduler.get_last_lr()[0]:.6f}'
         mylog(log_str, path=log_path)
         contrastive_loss_epoch = 0
         model.train()
@@ -69,10 +69,10 @@ def training(args):
             optimizer_model.step()
 
             contrastive_loss_epoch += loss.item()
-            scheduler.step()
+
             if (index_i+1) == steps_per_epoch and args.all:
                 break
-
+        scheduler.step()
         use_sample = (epoch_i+1)*batch_size*steps_per_epoch
 
         # mylog("contrastive_loss:" + "%.6f" % (contrastive_loss_epoch / steps_per_epoch),path=log_path)
