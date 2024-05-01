@@ -51,7 +51,8 @@ def training(args):
 
     for epoch_i in range(epochs):
         mylog("\n*************", path=log_path)
-        mylog('epoch ' + str(epoch_i + 1) + str(scheduler.get_last_lr()[0]), path=log_path)
+        log_str = f'epoch {epoch_i + 1} {scheduler.get_last_lr()[0]:.6f}'
+        mylog(log_str, path=log_path)
         contrastive_loss_epoch = 0
         model.train()
 
