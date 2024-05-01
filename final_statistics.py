@@ -254,5 +254,4 @@ if __name__ == "__main__":
 
     set_seed(100)
 
-    args.threshold = 0.15235882997512817
     final_statistics(args)
