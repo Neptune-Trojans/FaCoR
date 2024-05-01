@@ -1,4 +1,5 @@
 from sklearn.metrics import roc_curve, auc
+from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -44,12 +45,13 @@ def training(args):
 
     model = torch.nn.DataParallel(model)
     optimizer_model = SGD(model.parameters(), lr=args.lr, momentum=0.9)
+    scheduler = StepLR(optimizer_model, step_size=5, gamma=0.05)
 
     max_auc = 0.0
 
     for epoch_i in range(epochs):
         mylog("\n*************", path=log_path)
-        mylog('epoch ' + str(epoch_i + 1), path=log_path)
+        mylog('epoch ' + str(epoch_i + 1) + str(scheduler.get_last_lr()[0]), path=log_path)
         contrastive_loss_epoch = 0
         model.train()
 
@@ -66,7 +68,7 @@ def training(args):
             optimizer_model.step()
 
             contrastive_loss_epoch += loss.item()
-
+            scheduler.step()
             if (index_i+1) == steps_per_epoch and args.all:
                 break
 
