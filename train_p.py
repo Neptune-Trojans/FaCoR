@@ -45,7 +45,7 @@ def training(args):
 
     model = torch.nn.DataParallel(model)
     optimizer_model = SGD(model.parameters(), lr=args.lr, momentum=0.9)
-    scheduler = StepLR(optimizer_model, step_size=5, gamma=0.05)
+    scheduler = StepLR(optimizer_model, step_size=5, gamma=0.85)
 
     max_auc = 0.0
 
