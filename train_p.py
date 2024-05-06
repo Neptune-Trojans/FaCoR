@@ -73,7 +73,7 @@ def training(args):
             if (index_i+1) == steps_per_epoch and args.all:
                 break
         scheduler.step()
-        use_sample = (epoch_i+1)*batch_size*steps_per_epoch
+        # use_sample = (epoch_i+1)*batch_size*steps_per_epoch
 
         # mylog("contrastive_loss:" + "%.6f" % (contrastive_loss_epoch / steps_per_epoch),path=log_path)
         model.eval()
