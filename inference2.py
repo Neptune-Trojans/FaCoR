@@ -1,3 +1,5 @@
+import itertools
+from collections import Counter
 from typing import Optional
 import ast
 import os
@@ -5,6 +7,7 @@ import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
+import random
 
 from face_alignment import align
 from final_statistics import baseline_model2
@@ -41,33 +44,63 @@ class PredictionsCreator:
         pred = pred[0]
         return pred
 
-    def create_predictions(self, pairs_df: pd.DataFrame) -> pd.DataFrame:
+    def create_predictions(self, pairs_df: pd.DataFrame, k=7) -> pd.DataFrame:
         unit_predictions = []
         related_unrelated_scores = []
         similarity_scores = []
 
         for _, row in tqdm(pairs_df.iterrows(), total=len(pairs_df)):
-            img1 = row['images1'][0]
-            img2 = row['images2'][0]
-            img1 = os.path.join(self._images_root, img1)
-            img2 = os.path.join(self._images_root, img2)
+            images1 = row['images1']
+            images2 = row['images2']
 
-            prediction = self.prediction(img1, img2)
+            # images1_sample = random.choices(images1, k=k)
+            # images2_sample = random.choices(images2, k=k)
+            #
+            # samples = tuple(zip(images1_sample, images2_sample))
+            unique_permutations = list(itertools.product(images1, images2))
+            unique_permutations = unique_permutations[:min(k,  len(unique_permutations))]
 
-            if prediction is None:
-                # detector issues
-                unit_predictions.append('NOT_ENOUGH_VISUAL_INFORMATION')
-                related_unrelated_scores.append([0.0, 0.0])
-                similarity_scores.append(0.0)
-                continue
+            counter = []
+            scores = []
+            for img1, img2 in unique_permutations:
+                print(f'{img1} {img2}')
+                img1 = os.path.join(self._images_root, img1)
+                img2 = os.path.join(self._images_root, img2)
 
-            result = 'UNRELATED'
-            if prediction > self._threshold:
-                result = 'RELATED'
+                prediction = self.prediction(img1, img2)
 
-            unit_predictions.append(result)
-            related_unrelated_scores.append([prediction, prediction])
-            similarity_scores.append(prediction)
+                if prediction is None:
+                    # detector issues
+                    result = 'NOT_ENOUGH_VISUAL_INFORMATION'
+                    prediction = 0.0
+                else:
+                    result = 'UNRELATED'
+                    if prediction > self._threshold:
+                        result = 'RELATED'
+
+                counter.append(result)
+                scores.append(prediction)
+
+            counts = Counter(counter)
+            print(counts)
+            if len(counts) == 1:
+                most_common_string, count = counts.most_common(1)[0]
+                unit_predictions.append(most_common_string)
+            else:
+                most_common_string, most_common_count = counts.most_common(1)[0]
+                second_common_string, second_common_count = counts.most_common(2)[1]
+
+                if most_common_count == second_common_count + 1:
+                    unit_predictions.append('NOT_ENOUGH_VISUAL_INFORMATION')
+
+                elif most_common_count / len(counter) >= 0.51:
+                    unit_predictions.append(most_common_string)
+
+                else:
+                    unit_predictions.append('NOT_ENOUGH_VISUAL_INFORMATION')
+            print(np.mean(scores))
+            related_unrelated_scores.append([np.mean(scores), np.mean(scores)])
+            similarity_scores.append(np.mean(scores))
 
         pairs_df['unit_predictions'] = unit_predictions
         pairs_df['related_unrelated_scores'] = related_unrelated_scores
@@ -78,7 +111,7 @@ class PredictionsCreator:
 
 
 if __name__ == '__main__':
-    threshold = 0.10982190817594528
+    threshold = 0.11132144927978516
     model_path = '/Users/yudkin/dev/FaCoR/output_data/model.pth'
     device = get_device()
     pairs_data = '/Users/yudkin/Documents/Datasets/facebook_test2/verify_all.csv'
@@ -90,5 +123,6 @@ if __name__ == '__main__':
     pairs_df = pairs_df[pairs_df.source == 'facebook']
 
     p = PredictionsCreator(threshold, model_path, device, images_root)
+    # print(p.prediction('/Users/yudkin/Documents/Warren_family/2/daughter_1/image_5.jpg', '/Users/yudkin/Documents/Warren_family/2/warren/image_0.jpg'))
     pairs_df = p.create_predictions(pairs_df)
     pairs_df.to_csv('pairs_unit_predictions.csv')
