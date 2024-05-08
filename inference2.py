@@ -3,9 +3,13 @@ from collections import Counter
 from typing import Optional
 import ast
 import os
+from PIL import Image
+
+import insightface
 import numpy as np
 import pandas as pd
 import torch
+from insightface.utils import face_align
 from tqdm import tqdm
 import random
 
@@ -20,6 +24,8 @@ class PredictionsCreator:
         self._model = baseline_model2(model_path, device)
         self._device = device
         self._images_root = images_root
+        self._detector = insightface.app.FaceAnalysis(name="buffalo_l", allowed_modules=["detection"])
+        self._detector.prepare(ctx_id=-1, det_size=(320, 320))
 
     def _prepare_image(self, image_path):
 
@@ -32,9 +38,24 @@ class PredictionsCreator:
         image = torch.from_numpy(image).type(torch.float).to(device=self._device)
         return image
 
+    def _prepare_image2(self, image_path):
+        img = Image.open(image_path)
+        image = np.array(img)
+        model_detections = self._detector.get(image)
+
+        # image = align.get_aligned_face(image_path)
+        if (model_detections is None) or (len(model_detections) == 0):
+            return None
+        image = face_align.norm_crop(image, landmark=model_detections[0]['kps'])
+        # image = np.array(image)
+        image = np.transpose(image, (2, 0, 1))
+        image = image[np.newaxis, :]
+        image = torch.from_numpy(image).type(torch.float).to(device=self._device)
+        return image
+
     def prediction(self, image1_path: str, image2_path: str) -> Optional[float]:
-        image1 = self._prepare_image(image1_path)
-        image2 = self._prepare_image(image2_path)
+        image1 = self._prepare_image2(image1_path)
+        image2 = self._prepare_image2(image2_path)
 
         if image1 is None or image2 is None:
             return None
@@ -44,7 +65,7 @@ class PredictionsCreator:
         pred = pred[0]
         return pred
 
-    def create_predictions(self, pairs_df: pd.DataFrame, k=7) -> pd.DataFrame:
+    def create_predictions(self, pairs_df: pd.DataFrame, k=5) -> pd.DataFrame:
         unit_predictions = []
         related_unrelated_scores = []
         similarity_scores = []
