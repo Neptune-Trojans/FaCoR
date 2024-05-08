@@ -11,7 +11,6 @@ import pandas as pd
 import torch
 from insightface.utils import face_align
 from tqdm import tqdm
-import random
 
 from face_alignment import align
 from final_statistics import baseline_model2
